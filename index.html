@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube List App</title>
+  <title>YouTube List</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,18 +11,18 @@
   <!-- タブバー -->
   <div class="tabs">
     <button class="tab active" data-category="all">すべて</button>
-    <button class="tab" data-category="work">睡眠用</button>
-    <button class="tab" data-category="study">作業用</button>
+    <button class="tab" data-category="sleep">睡眠用</button>
+    <button class="tab" data-category="work">作業用</button>
     <button class="tab" data-category="fav">お気に入り</button>
-    <button class="tab add-btn" id="openForm">＋</button>
+    <button class="tab add-btn" id="addTab">＋</button>
   </div>
 
-  <!-- 一覧画面 -->
+  <!-- 一覧 -->
   <div id="listView">
     <div id="videoList"></div>
   </div>
 
-  <!-- 登録フォーム画面 -->
+  <!-- フォーム -->
   <div id="formView" class="hidden">
     <h2 id="formTitle">動画を追加</h2>
 
@@ -43,8 +43,8 @@
 
     <label>カテゴリ</label>
     <select id="categoryInput">
-      <option value="work">睡眠用</option>
-      <option value="study">作業用</option>
+      <option value="sleep">睡眠用</option>
+      <option value="work">作業用</option>
       <option value="fav">お気に入り</option>
     </select>
 
@@ -55,4 +55,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
