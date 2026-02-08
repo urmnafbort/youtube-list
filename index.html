@@ -2,22 +2,55 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube List App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <div class="tabs">
-      <button class="tab active" data-category="all">すべて</button>
-      <button class="tab" data-category="work">作業用</button>
-      <button class="tab" data-category="study">勉強用</button>
-      <button class="tab" data-category="fav">お気に入り</button>
-    </div>
-  </header>
+  <!-- タブバー -->
+  <div class="tabs">
+    <button class="tab active" data-category="all">すべて</button>
+    <button class="tab" data-category="work">作業用</button>
+    <button class="tab" data-category="study">勉強用</button>
+    <button class="tab" data-category="fav">お気に入り</button>
+    <button class="tab add-btn" id="openForm">＋</button>
+  </div>
 
-  <main id="video-list"></main>
+  <!-- 一覧画面 -->
+  <div id="listView">
+    <div id="videoList"></div>
+  </div>
+
+  <!-- 登録フォーム画面 -->
+  <div id="formView" class="hidden">
+    <h2 id="formTitle">動画を追加</h2>
+
+    <label>URL</label>
+    <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=xxxx">
+
+    <label>タイトル</label>
+    <input type="text" id="titleInput">
+
+    <label>開始時間（秒 or mm:ss）</label>
+    <input type="text" id="startInput">
+
+    <label>動画時間（自動取得）</label>
+    <input type="text" id="durationInput" readonly>
+
+    <label>説明</label>
+    <textarea id="descInput"></textarea>
+
+    <label>カテゴリ</label>
+    <select id="categoryInput">
+      <option value="work">作業用</option>
+      <option value="study">勉強用</option>
+      <option value="fav">お気に入り</option>
+    </select>
+
+    <button id="saveBtn">保存</button>
+    <button id="cancelBtn">キャンセル</button>
+  </div>
 
   <script src="app.js"></script>
 </body>
