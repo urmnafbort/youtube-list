@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f2f2f7;
+}
+
+header {
+  background: white;
+  padding: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #e5e5ea;
+  font-size: 14px;
+}
+
+.tab.active {
+  background: #007aff;
+  color: white;
+}
+
+#video-list {
+  padding: 10px;
+}
+
+.card {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.thumb {
+  width: 120px;
+  height: 68px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.info {
+  margin-left: 12px;
+  flex: 1;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.desc {
+  font-size: 13px;
+  color: #555;
+}
