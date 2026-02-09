@@ -213,12 +213,20 @@ function extractID(url) {
   return m ? m[1] : null;
 }
 
-// ISO8601 → mm:ss
+// ISO8601 → hh:mm:ss
 function isoToTime(iso) {
-  const m = iso.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
-  const min = parseInt(m?.[1] || "0", 10);
-  const sec = parseInt(m?.[2] || "0", 10);
-  return `${min}:${sec.toString().padStart(2, "0")}`;
+  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+
+  const h = parseInt(match?.[1] || "0", 10);
+  const m = parseInt(match?.[2] || "0", 10);
+  const s = parseInt(match?.[3] || "0", 10);
+
+  const total = h * 3600 + m * 60 + s;
+
+  const mm = Math.floor(total / 60);
+  const ss = total % 60;
+
+  return `${mm}:${ss.toString().padStart(2, "0")}`;
 }
 
 // 保存（PCのみ・videos.json をダウンロード）
@@ -282,4 +290,5 @@ function downloadVideosJson() {
 document.getElementById("cancelBtn").addEventListener("click", () => {
   hideForm();
 });
+
 
