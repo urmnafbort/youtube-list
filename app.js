@@ -221,12 +221,11 @@ function isoToTime(iso) {
   const m = parseInt(match?.[2] || "0", 10);
   const s = parseInt(match?.[3] || "0", 10);
 
-  const total = h * 3600 + m * 60 + s;
+  const hh = h.toString().padStart(2, "0");
+  const mm = m.toString().padStart(2, "0");
+  const ss = s.toString().padStart(2, "0");
 
-  const mm = Math.floor(total / 60);
-  const ss = total % 60;
-
-  return `${mm}:${ss.toString().padStart(2, "0")}`;
+  return `${hh}:${mm}:${ss}`;
 }
 
 // 保存（PCのみ・videos.json をダウンロード）
@@ -290,5 +289,6 @@ function downloadVideosJson() {
 document.getElementById("cancelBtn").addEventListener("click", () => {
   hideForm();
 });
+
 
 
