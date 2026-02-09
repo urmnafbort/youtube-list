@@ -1,6 +1,6 @@
 const API_KEY = "YOUR_API_KEY_HERE";
 
-// 画面幅で「スマホかどうか」をざっくり判定
+// ざっくり PC / モバイル判定
 const isMobile = window.innerWidth < 700;
 
 let videos = [];
@@ -12,6 +12,9 @@ fetch("videos.json?v=20240209")
   .then(data => {
     videos = data || [];
     renderList("all");
+  })
+  .catch(err => {
+    console.error("videos.json の読み込みに失敗:", err);
   });
 
 // タブ切り替え
@@ -19,7 +22,6 @@ document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
     const category = tab.dataset.category;
 
-    // ＋タブ
     if (tab.id === "addTab") return;
 
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -32,7 +34,6 @@ document.querySelectorAll(".tab").forEach(tab => {
 // ＋タブ（PCのみ有効）
 const addTab = document.getElementById("addTab");
 if (isMobile) {
-  // スマホでは＋を非表示（閲覧専用）
   addTab.style.display = "none";
 } else {
   addTab.addEventListener("click", () => {
@@ -71,11 +72,10 @@ function renderList(category) {
     card.appendChild(thumb);
     card.appendChild(body);
 
-    // PCのみ：クリックでYouTubeへ、長押しで編集
     if (!isMobile) {
       // 通常クリック → YouTubeを開く
       card.addEventListener("click", (e) => {
-        // 編集モードへの長押しと区別したいなら、ここでフラグを使うこともできる
+        // 長押しで編集したときの click を抑制したい場合はフラグ管理も可能
         window.open(`https://www.youtube.com/watch?v=${v.id}${buildStartParam(v.start)}`, "_blank");
       });
 
@@ -95,7 +95,7 @@ function renderList(category) {
       });
     }
 
-    // スマホでは長押し自体を無効化（スクロール誤作動防止）
+    // モバイルでは長押し自体を使わない（スクロール誤作動防止）
     list.appendChild(card);
   });
 }
@@ -109,7 +109,6 @@ function labelForCategory(cat) {
 
 function buildStartParam(start) {
   if (!start) return "";
-  // "mm:ss" or "ss" を秒に変換
   let sec = 0;
   if (start.includes(":")) {
     const [m, s] = start.split(":").map(n => parseInt(n || 0, 10));
@@ -120,7 +119,7 @@ function buildStartParam(start) {
   return sec > 0 ? `&t=${sec}s` : "";
 }
 
-// 新規追加フォームを開く（PCのみ）
+// 新規追加フォーム（PCのみ）
 function openFormForNew() {
   editIndex = null;
   document.getElementById("formTitle").textContent = "動画を追加";
@@ -128,7 +127,7 @@ function openFormForNew() {
   showForm();
 }
 
-// 編集フォームを開く（PCのみ）
+// 編集フォーム（PCのみ）
 function openEdit(index) {
   editIndex = index;
   const v = videos[index];
@@ -163,35 +162,48 @@ function clearForm() {
   document.getElementById("categoryInput").value = "work";
 }
 
-// URL入力 → タイトル＆時間自動取得
+// URL入力 → タイトル＆動画時間自動取得
 document.getElementById("urlInput").addEventListener("change", async () => {
   const url = document.getElementById("urlInput").value.trim();
   const id = extractID(url);
-  if (!id) return;
+  if (!id) {
+    alert("YouTube の URL が正しくありません。");
+    return;
+  }
 
   // タイトル（oEmbed）
   try {
     const oembed = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`)
-      .then(r => r.json());
+      .then(r => {
+        if (!r.ok) throw new Error("oEmbed 取得失敗");
+        return r.json();
+      });
     if (oembed && oembed.title) {
       document.getElementById("titleInput").value = oembed.title;
     }
   } catch (e) {
-    // 失敗しても無視
+    console.error("タイトル取得エラー:", e);
   }
 
   // 動画時間（YouTube Data API）
   try {
     const api = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?id=${id}&part=contentDetails&key=${API_KEY}`
-    ).then(r => r.json());
+    ).then(r => {
+      if (!r.ok) throw new Error("YouTube Data API 取得失敗");
+      return r.json();
+    });
 
     if (api.items && api.items.length > 0) {
       const iso = api.items[0].contentDetails.duration;
       document.getElementById("durationInput").value = isoToTime(iso);
+    } else {
+      console.warn("動画情報が取得できませんでした:", api);
+      alert("動画時間を取得できませんでした。APIキーや制限設定を確認してください。");
     }
   } catch (e) {
-    // 失敗しても無視
+    console.error("動画時間取得エラー:", e);
+    alert("動画時間の取得に失敗しました。コンソールを確認してください。");
   }
 });
 
@@ -203,14 +215,13 @@ function extractID(url) {
 
 // ISO8601 → mm:ss
 function isoToTime(iso) {
-  // PT#M#S だけ対応（時間は想定しない）
   const m = iso.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
   const min = parseInt(m?.[1] || "0", 10);
   const sec = parseInt(m?.[2] || "0", 10);
   return `${min}:${sec.toString().padStart(2, "0")}`;
 }
 
-// 保存（PCのみ有効）
+// 保存（PCのみ・videos.json をダウンロード）
 document.getElementById("saveBtn").addEventListener("click", () => {
   if (isMobile) {
     alert("スマートフォンからの編集は無効です（PCで編集してください）。");
@@ -233,19 +244,39 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     category: document.getElementById("categoryInput").value
   };
 
+  if (!data.title) {
+    alert("タイトルが空です。");
+    return;
+  }
+
   if (editIndex == null) {
     videos.push(data);
   } else {
     videos[editIndex] = data;
   }
 
-  // ここではローカルには保存せず、PC側で videos.json に反映して GitHub に push する運用
-  // 一旦画面上だけ更新
+  // 画面更新
   renderList("all");
   hideForm();
 
-  alert("画面上のリストは更新されました。\nvideos.json にも反映して GitHub に push してください。");
+  // videos.json を自動生成してダウンロード
+  downloadVideosJson();
+
+  alert("画面上のリストを更新し、videos.json をダウンロードしました。\nGitHub のリポジトリにアップロードしてください。");
 });
+
+// videos.json をダウンロード
+function downloadVideosJson() {
+  const blob = new Blob([JSON.stringify(videos, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "videos.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // キャンセル
 document.getElementById("cancelBtn").addEventListener("click", () => {
