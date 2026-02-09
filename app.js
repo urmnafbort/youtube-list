@@ -1,4 +1,4 @@
-const API_KEY = "YOUR_API_KEY_HERE";
+const API_KEY = "AIzaSyCaHNz22bXSi1Dczs9hUcqOkIEBFyYMbm8";
 
 // ざっくり PC / モバイル判定
 const isMobile = window.innerWidth < 700;
@@ -282,3 +282,4 @@ function downloadVideosJson() {
 document.getElementById("cancelBtn").addEventListener("click", () => {
   hideForm();
 });
+
